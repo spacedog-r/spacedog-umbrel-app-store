@@ -7,11 +7,11 @@ x-dawarich-environment: &dawarich-environment
   DATABASE_HOST: "db"
   DATABASE_PORT: "5432"
   DATABASE_USERNAME: "dawarich"
-  DATABASE_PASSWORD: "${APP_SEED}"
+  DATABASE_PASSWORD: "${APP_SPACEDOG_DAWARICH_POSTGRES_PASSWORD}"
   DATABASE_NAME: "dawarich"
-  APPLICATION_HOSTS: "${DEVICE_HOSTNAME},${DEVICE_HOSTNAME}.local,umbrel.local,localhost,127.0.0.1,::1,spacedog-dawarich_app_1"
+  APPLICATION_HOSTS: "${APP_DOMAIN},${DEVICE_DOMAIN_NAME},${DEVICE_HOSTNAME},localhost,127.0.0.1,::1,spacedog-dawarich_app_1"
   APPLICATION_PROTOCOL: "http"
-  SECRET_KEY_BASE: "${APP_SEED}"
+  SECRET_KEY_BASE: "${APP_SPACEDOG_DAWARICH_SECRET_KEY_BASE}"
   RAILS_LOG_TO_STDOUT: "true"
   PROMETHEUS_EXPORTER_ENABLED: "false"
   STORE_GEODATA: "true"
@@ -23,17 +23,23 @@ services:
     environment:
       APP_HOST: spacedog-dawarich_app_1
       APP_PORT: 3000
-      # Dawarich mobile apps and trackers authenticate with Dawarich API keys.
-      PROXY_AUTH_ADD: "false"
+      # Dawarich mobile apps and trackers must reach API routes without an Umbrel session.
+      PROXY_AUTH_WHITELIST: "/api/*"
 
   app:
     image: freikin/dawarich:1.10.0@sha256:25ba1dc02e5571cc915bd104aae9c4c28929848ad1741c1829f5c40f86489a16
     entrypoint: web-entrypoint.sh
-    command: ["bin/rails", "server", "-p", "3000", "-b", "::"]
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        bin/rails runner 'user = User.find_by(email: "demo@dawarich.app"); if user&.valid_password?("safepassword"); password = ENV.fetch("APP_PASSWORD"); user.update!(password: password, password_confirmation: password); end';
+        exec bin/rails server -p 3000 -b ::
     restart: on-failure
     init: true
     environment:
       <<: *dawarich-environment
+      APP_PASSWORD: "${APP_PASSWORD}"
       TIME_ZONE: "Europe/Amsterdam"
       WEB_CONCURRENCY: "1"
     volumes:
@@ -107,7 +113,7 @@ services:
     restart: on-failure
     environment:
       POSTGRES_USER: "dawarich"
-      POSTGRES_PASSWORD: "${APP_SEED}"
+      POSTGRES_PASSWORD: "${APP_SPACEDOG_DAWARICH_POSTGRES_PASSWORD}"
       POSTGRES_DB: "dawarich"
     volumes:
       - ${APP_DATA_DIR}/data/postgres:/var/lib/postgresql/data

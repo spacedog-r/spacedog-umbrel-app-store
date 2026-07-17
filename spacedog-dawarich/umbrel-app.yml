@@ -1,0 +1,38 @@
+manifestVersion: 1
+id: spacedog-dawarich
+category: files
+name: Dawarich
+version: "1.10.0"
+tagline: Your self-hosted location history tracker
+icon: https://raw.githubusercontent.com/spacedog-r/spacedog-umbrel-app-store/master/spacedog-dawarich/assets/icon.png
+description: >-
+  Dawarich is a self-hosted alternative to Google Timeline for recording, importing, exploring, and sharing your location history.
+
+
+  On first install, Umbrel replaces Dawarich's public upstream demo password with a unique local password. Use the username shown below and the password displayed by Umbrel. API routes remain reachable for mobile apps and trackers and are protected by Dawarich API keys.
+
+
+  Features include interactive maps, trips, statistics, insights, family location sharing, imports from Google Maps Timeline, OwnTracks, GPX and GeoJSON, and photo integrations with Immich and PhotoPrism.
+
+
+  Dawarich is under active development. Keep backups of your original location data and read upstream release notes before updating.
+releaseNotes: ""
+
+developer: Evgenii Frolov
+website: https://dawarich.app
+dependencies: []
+repo: https://github.com/Freika/dawarich
+support: https://github.com/Freika/dawarich/discussions
+
+port: 4583
+gallery:
+  - https://raw.githubusercontent.com/spacedog-r/spacedog-umbrel-app-store/master/spacedog-dawarich/assets/1.png
+  - https://raw.githubusercontent.com/spacedog-r/spacedog-umbrel-app-store/master/spacedog-dawarich/assets/2.png
+  - https://raw.githubusercontent.com/spacedog-r/spacedog-umbrel-app-store/master/spacedog-dawarich/assets/3.png
+path: ""
+
+defaultUsername: demo@dawarich.app
+deterministicPassword: true
+
+submitter: spacedog-r
+submission: https://github.com/spacedog-r/spacedog-umbrel-app-store

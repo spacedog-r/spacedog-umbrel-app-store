@@ -1,8 +1,8 @@
 <div align="center">
 
-# Spacedog Umbrel App Store
+# Spacedog's Community Store for Umbrel
 
-Maintained Umbrel packages for self-hosted apps that are missing or outdated in other app stores.
+Maintained community packages for third-party self-hosted apps on umbrelOS.
 
 **2 apps · pinned images · locally generated secrets · runtime tested**
 

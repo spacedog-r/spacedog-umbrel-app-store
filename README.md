@@ -1,76 +1,107 @@
+<div align="center">
+
 # Spacedog Umbrel App Store
 
-A personal Umbrel Community App Store for maintained self-hosted app packages that are not available, or not sufficiently current, in the official Umbrel App Store.
+Maintained Umbrel packages for self-hosted apps that are missing or outdated in other app stores.
 
-## Add this store to Umbrel
+**2 apps · pinned images · locally generated secrets · runtime tested**
 
-Add the following Community App Store URL in the umbrelOS App Store settings:
+</div>
+
+## Add to Umbrel
+
+1. Open the **App Store** in umbrelOS.
+2. Open the Community App Store settings.
+3. Add this repository:
 
 ```text
 https://github.com/spacedog-r/spacedog-umbrel-app-store
 ```
 
-## Apps
+## Available apps
 
-### Dawarich
+| App | Package | Version | Platforms | Status |
+| --- | --- | --- | --- | --- |
+| <img src="./spacedog-dawarich/assets/icon.png" width="44" alt="Dawarich icon"> **Dawarich** | `spacedog-dawarich` | 1.10.0 | amd64 | ✅ Runtime verified |
+| <img src="./spacedog-grimmory/assets/icon.png" width="44" alt="Grimmory icon"> **Grimmory** | `spacedog-grimmory` | 3.2.4 | amd64, arm64 | ✅ Runtime verified |
 
-- Package ID: `spacedog-dawarich`
-- Upstream version: `1.10.0`
-- Architecture: `linux/amd64`
-- Upstream project: https://github.com/Freika/dawarich
+---
 
-The package uses pinned image tags and manifest digests, app-specific persistent data under Umbrel's app data directory, Umbrel's app proxy, and locally derived per-install secrets. No secrets are stored in this repository.
+## <img src="./spacedog-dawarich/assets/icon.png" width="36" alt=""> Dawarich
 
-The official PostGIS image selected by Dawarich 1.10.0 is amd64-only. ARM support can be evaluated separately using the alternative image recommended by Dawarich upstream.
+A self-hosted location history tracker and Google Timeline alternative.
 
-#### Runtime verification
+[Package files](./spacedog-dawarich) · [Upstream project](https://github.com/Freika/dawarich) · [Website](https://dawarich.app)
 
-Dawarich 1.10.0 has been verified on an amd64 umbrelOS system:
+- Interactive maps, trips, statistics, and insights
+- Imports from Google Maps Timeline, OwnTracks, GPX, and GeoJSON
+- Mobile app and tracker API support
+- PostgreSQL/PostGIS, Redis, and Sidekiq
+- Umbrel-generated login password and persistent appdata
 
-- installation and first-start database setup
-- Umbrel-generated login credentials
-- app-proxy access
+> **Compatibility:** This package currently targets amd64 because the official PostGIS image selected by Dawarich 1.10.0 is amd64-only.
+
+<details>
+<summary><strong>Runtime verification</strong></summary>
+
+Dawarich 1.10.0 has been tested on an amd64 umbrelOS system:
+
+- Installation and first-start database setup
+- Umbrel-generated credentials and app-proxy access
 - GPX upload and import
 - Redis and Sidekiq background processing
 - PostgreSQL/PostGIS persistence across restarts
-- clean uninstall and reinstall
+- Clean uninstall and reinstall
 
-A real in-place upgrade test is deferred until a newer stable upstream release is packaged.
+</details>
 
-### Grimmory
+---
 
-- Package ID: `spacedog-grimmory`
-- Upstream version: `3.2.4`
-- Architectures: `linux/amd64`, `linux/arm64`
-- Upstream project: https://github.com/grimmory-tools/grimmory
+## <img src="./spacedog-grimmory/assets/icon.png" width="36" alt=""> Grimmory
 
-Grimmory uses its official release image and the LinuxServer MariaDB image selected by upstream, both pinned by tag and manifest digest. Application data, books, BookDrop, and MariaDB are stored under Umbrel's app data directory. Database credentials are derived locally per install.
+A self-hosted digital library for ebooks, PDFs, comics, and audiobooks.
 
-#### Runtime verification
+[Package files](./spacedog-grimmory) · [Upstream project](https://github.com/grimmory-tools/grimmory) · [Website](https://grimmory.org)
 
-Grimmory 3.2.4 has been verified on an amd64 umbrelOS system:
+- Browser-based readers and metadata lookup
+- Smart shelves, annotations, and reading progress
+- BookDrop uploads and automatic processing
+- OPDS, Kobo, and KOReader integrations
+- Multi-user support and persistent MariaDB storage
 
-- installation, database migrations, and first-run admin setup
-- app-proxy access and authenticated login
-- library creation using the persistent `/books` mount
-- browser upload to BookDrop
-- EPUB metadata processing and finalization into a library
-- built-in EPUB reader
-- MariaDB, library metadata, and book-file persistence across restarts
-- clean uninstall and reinstall
+> **Startup note:** Grimmory can briefly return `ERR_CONNECTION_RESET` after installation or restart while MariaDB, migrations, and the Java application finish starting. Refresh after a short wait. Check the container logs if it remains unavailable for more than five minutes.
 
-Grimmory can briefly return `ERR_CONNECTION_RESET` immediately after install or restart while MariaDB, migrations, and the Java application finish starting. Refresh after a short wait. Investigate the container logs if it remains unavailable for more than five minutes.
+<details>
+<summary><strong>Runtime verification</strong></summary>
 
-A real in-place upgrade test is deferred until a newer stable upstream release is packaged.
+Grimmory 3.2.4 has been tested on an amd64 umbrelOS system:
+
+- Installation, database migrations, and first-run admin setup
+- App-proxy access and authenticated login
+- Library creation using the persistent `/books` mount
+- Browser upload to BookDrop
+- EPUB metadata processing and library finalization
+- Built-in EPUB reader
+- MariaDB, metadata, and book-file persistence across restarts
+- Clean uninstall and reinstall
+
+</details>
 
 ## Security
 
-Packages do not use privileged mode, host networking, the Docker socket, device mounts, or broad host mounts.
+- ✅ Image versions and manifest digests are pinned
+- ✅ Secrets are generated locally per installation
+- ✅ Persistent data stays inside Umbrel's appdata structure
+- ✅ No privileged mode or host networking
+- ✅ No Docker socket, device mounts, or broad host mounts
+- ✅ No `latest` tags
 
-Dawarich API routes bypass Umbrel proxy authentication so mobile clients and trackers can connect; those routes remain protected by Dawarich API keys. Dawarich's public upstream demo password is replaced on first start with Umbrel's deterministic per-install app password.
+Dawarich API routes bypass Umbrel proxy authentication for mobile clients and trackers, but remain protected by Dawarich API keys.
 
-Grimmory exposes only its OPDS, KOReader, and Kobo integration paths past Umbrel proxy authentication. Grimmory's own account or token authentication remains in force. Its administrator account is created through Grimmory's upstream first-run wizard.
+Grimmory exposes only its OPDS, KOReader, and Kobo integration routes past Umbrel proxy authentication. Grimmory's own account or token authentication remains active.
 
-## Updating
+## Updates
 
-Updates are reviewed against the upstream release notes and Compose configuration before image versions or digests are changed. Automatic `latest` updates are intentionally not used.
+Every update is reviewed against upstream release notes, Compose configuration, environment variables, and image manifests before publication.
+
+Real in-place upgrades are tested when a newer stable upstream release becomes available.

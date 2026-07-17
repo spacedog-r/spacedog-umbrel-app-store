@@ -1,0 +1,142 @@
+version: "3.7"
+
+x-dawarich-environment: &dawarich-environment
+  RAILS_ENV: "production"
+  SELF_HOSTED: "true"
+  REDIS_URL: "redis://redis:6379"
+  DATABASE_HOST: "db"
+  DATABASE_PORT: "5432"
+  DATABASE_USERNAME: "dawarich"
+  DATABASE_PASSWORD: "${APP_SEED}"
+  DATABASE_NAME: "dawarich"
+  APPLICATION_HOSTS: "${DEVICE_HOSTNAME},${DEVICE_HOSTNAME}.local,umbrel.local,localhost,127.0.0.1,::1,spacedog-dawarich_app_1"
+  APPLICATION_PROTOCOL: "http"
+  SECRET_KEY_BASE: "${APP_SEED}"
+  RAILS_LOG_TO_STDOUT: "true"
+  PROMETHEUS_EXPORTER_ENABLED: "false"
+  STORE_GEODATA: "true"
+  PUID: "1000"
+  PGID: "1000"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: spacedog-dawarich_app_1
+      APP_PORT: 3000
+      # Dawarich mobile apps and trackers authenticate with Dawarich API keys.
+      PROXY_AUTH_ADD: "false"
+
+  app:
+    image: freikin/dawarich:1.10.0@sha256:25ba1dc02e5571cc915bd104aae9c4c28929848ad1741c1829f5c40f86489a16
+    entrypoint: web-entrypoint.sh
+    command: ["bin/rails", "server", "-p", "3000", "-b", "::"]
+    restart: on-failure
+    init: true
+    environment:
+      <<: *dawarich-environment
+      TIME_ZONE: "Europe/Amsterdam"
+      WEB_CONCURRENCY: "1"
+    volumes:
+      - ${APP_DATA_DIR}/data/public:/var/app/public
+      - ${APP_DATA_DIR}/data/watched:/var/app/tmp/imports/watched
+      - ${APP_DATA_DIR}/data/storage:/var/app/storage
+      # Retained from upstream for Dawarich's database backup functionality.
+      - ${APP_DATA_DIR}/data/postgres:/dawarich_db_data
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 4G
+
+  sidekiq:
+    image: freikin/dawarich:1.10.0@sha256:25ba1dc02e5571cc915bd104aae9c4c28929848ad1741c1829f5c40f86489a16
+    entrypoint: sidekiq-entrypoint.sh
+    command: ["sidekiq"]
+    restart: on-failure
+    init: true
+    environment:
+      <<: *dawarich-environment
+      BACKGROUND_PROCESSING_CONCURRENCY: "3"
+    volumes:
+      - ${APP_DATA_DIR}/data/public:/var/app/public
+      - ${APP_DATA_DIR}/data/watched:/var/app/tmp/imports/watched
+      - ${APP_DATA_DIR}/data/storage:/var/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
+        restart: true
+      app:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f sidekiq"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "5"
+
+  db:
+    image: postgis/postgis:17-3.5-alpine@sha256:fe9821935d163abca5611e3e0a6a7c73c8c547f3412ed2036ec0ed8f789390da
+    shm_size: 1G
+    restart: on-failure
+    environment:
+      POSTGRES_USER: "dawarich"
+      POSTGRES_PASSWORD: "${APP_SEED}"
+      POSTGRES_DB: "dawarich"
+    volumes:
+      - ${APP_DATA_DIR}/data/postgres:/var/lib/postgresql/data
+      - ${APP_DATA_DIR}/data/shared:/var/shared
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dawarich -d dawarich"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7.4-alpine@sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99
+    command:
+      - redis-server
+      - --save
+      - "900"
+      - "1"
+      - --save
+      - "300"
+      - "10"
+      - --appendonly
+      - "no"
+    restart: on-failure
+    volumes:
+      - ${APP_DATA_DIR}/data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

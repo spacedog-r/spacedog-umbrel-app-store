@@ -1,0 +1,38 @@
+manifestVersion: 1
+id: spacedog-grimmory
+category: files
+name: Grimmory
+version: "3.2.4"
+tagline: Your self-hosted digital library
+icon: https://raw.githubusercontent.com/spacedog-r/spacedog-umbrel-app-store/master/spacedog-grimmory/assets/icon.png
+description: >-
+  Grimmory is a self-hosted digital library for organizing and reading ebooks, PDFs, comics, and audiobooks. It includes browser-based readers, metadata lookup, smart shelves, annotations, reading progress, and multi-user support.
+
+
+  Device integrations include OPDS, Kobo, and KOReader. Their dedicated API routes bypass Umbrel proxy authentication so compatible readers can connect, while Grimmory continues to enforce its own account or token authentication.
+
+
+  On first launch, Grimmory presents its upstream setup wizard for creating the administrator account. No administrator password is generated or stored by this package.
+
+
+  Persistent application data, books, the BookDrop folder, and MariaDB data are stored only inside Umbrel's app data directory. Back up your library and database before future upgrades.
+releaseNotes: ""
+
+developer: Grimmory
+website: https://grimmory.org
+dependencies: []
+repo: https://github.com/grimmory-tools/grimmory
+support: https://github.com/grimmory-tools/grimmory/issues
+
+port: 6061
+gallery:
+  - https://raw.githubusercontent.com/spacedog-r/spacedog-umbrel-app-store/master/spacedog-grimmory/assets/1.png
+  - https://raw.githubusercontent.com/spacedog-r/spacedog-umbrel-app-store/master/spacedog-grimmory/assets/2.png
+  - https://raw.githubusercontent.com/spacedog-r/spacedog-umbrel-app-store/master/spacedog-grimmory/assets/3.png
+path: ""
+
+defaultUsername: ""
+defaultPassword: ""
+
+submitter: spacedog-r
+submission: https://github.com/spacedog-r/spacedog-umbrel-app-store

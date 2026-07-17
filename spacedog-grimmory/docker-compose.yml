@@ -1,0 +1,67 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: spacedog-grimmory_app_1
+      APP_PORT: 6060
+      # External readers use Grimmory's own token or account authentication.
+      PROXY_AUTH_WHITELIST: "/api/v1/opds,/api/v1/opds/*,/api/koreader/*,/api/kobo/*"
+
+  app:
+    image: grimmory/grimmory:v3.2.4@sha256:dfa7afdfcf25d649fd664497a62385dd00cd9678c37546e182c172e41c8e80cb
+    restart: on-failure
+    init: true
+    environment:
+      USER_ID: "1000"
+      GROUP_ID: "1000"
+      TZ: "Europe/Amsterdam"
+      DATABASE_URL: "jdbc:mariadb://db:3306/grimmory"
+      DATABASE_USERNAME: "grimmory"
+      DATABASE_PASSWORD: "${APP_SPACEDOG_GRIMMORY_DATABASE_PASSWORD}"
+      API_DOCS_ENABLED: "false"
+      DISK_TYPE: "LOCAL"
+    volumes:
+      - ${APP_DATA_DIR}/data/app:/app/data
+      - ${APP_DATA_DIR}/data/books:/books
+      - ${APP_DATA_DIR}/data/bookdrop:/bookdrop
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:6060/api/v1/healthcheck >/dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "5"
+
+  db:
+    image: lscr.io/linuxserver/mariadb:11.4.8@sha256:91de7f701bc7fc3a424b81beafca7a7c6c4c5b7c8be6afd2ae148698695c0b0c
+    restart: on-failure
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: "Europe/Amsterdam"
+      MYSQL_ROOT_PASSWORD: "${APP_SPACEDOG_GRIMMORY_DATABASE_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "grimmory"
+      MYSQL_USER: "grimmory"
+      MYSQL_PASSWORD: "${APP_SPACEDOG_GRIMMORY_DATABASE_PASSWORD}"
+    volumes:
+      - ${APP_DATA_DIR}/data/mariadb:/config
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "5"

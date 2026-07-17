@@ -6,6 +6,9 @@ version: "1.10.0"
 tagline: Your self-hosted location history tracker
 icon: https://raw.githubusercontent.com/spacedog-r/spacedog-umbrel-app-store/master/spacedog-dawarich/assets/icon.png
 description: >-
+  This package currently targets amd64 systems because Dawarich 1.10.0 uses the official amd64-only PostGIS 17 image. It matches this store's intended amd64 homelab platform.
+
+
   Dawarich is a self-hosted alternative to Google Timeline for recording, importing, exploring, and sharing your location history.
 
 

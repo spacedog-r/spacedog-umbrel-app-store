@@ -109,6 +109,8 @@ services:
 
   db:
     image: postgis/postgis:17-3.5-alpine@sha256:fe9821935d163abca5611e3e0a6a7c73c8c547f3412ed2036ec0ed8f789390da
+    # Upstream's official PostGIS image for this release is amd64-only.
+    platform: linux/amd64
     shm_size: 1G
     restart: on-failure
     environment:

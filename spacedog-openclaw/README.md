@@ -45,3 +45,34 @@ Umbrel will not automatically pull a fresh image solely because a moving
   permitted origins and device pairing; do NOT bypass Gateway authentication.
 
 Upstream documentation: https://docs.openclaw.ai/install/docker
+
+## First-install verification on UmbrelOS
+
+Once this PR is merged into `master`, refresh the community store and install
+**OpenClaw (Spacedog)**. This is a preview until runtime validated.
+
+1. In UmbrelOS, verify the app starts and opens through the Umbrel app tile.
+2. Over SSH, inspect status and logs without exposing secrets:
+   ```sh
+   sudo docker ps --filter name=spacedog-openclaw
+   sudo docker logs --tail=100 spacedog-openclaw_gateway_1
+   ```
+   If your Umbrel uses a different container naming convention, take the exact
+   name from `docker ps`.
+3. The gateway token is generated locally by Umbrel and injected into the
+   container environment. To read it **privately** on the host (do not paste it
+   into public issues, chat logs or screenshots):
+   ```sh
+   sudo docker exec spacedog-openclaw_gateway_1 printenv OPENCLAW_GATEWAY_TOKEN
+   ```
+   Enter that token in OpenClaw's Control UI Settings.
+4. If the browser reports `origin not allowed`, configure the exact trusted
+   Umbrel URL in `gateway.controlUi.allowedOrigins` within the persistent
+   `openclaw.json`. Never enable wildcard origins to work around it.
+5. Confirm that Gateway token/device pairing is functional and reboot Umbrel;
+   check that config persists and the container returns to a healthy state.
+6. Back up the app's data before any upgrade.
+
+The pre-start hook creates a minimal `gateway.mode=local` config when missing.
+It will not overwrite subsequent manual settings. A provider/API key must still
+be configured using OpenClaw's normal process. No provider secrets are bundled.

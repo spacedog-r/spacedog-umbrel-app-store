@@ -2,6 +2,7 @@ manifestVersion: 1.1
 id: spacedog-openclaw
 name: OpenClaw (Spacedog)
 tagline: Your self-hosted AI assistant
+icon: https://raw.githubusercontent.com/spacedog-r/spacedog-umbrel-app-store/master/spacedog-openclaw/assets/icon.webp
 category: ai
 version: "2026.10.4"
 port: 18789
